@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\ProductSize;
 
 use Illuminate\Support\Str;
 
@@ -40,15 +41,16 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store_old(Request $request)
     {
+        // dd($request->all());
         $validatedData = $request->validate([
             'title' => 'required|string',
             'summary' => 'required|string',
             'description' => 'nullable|string',
             'photo' => 'required|string',
             'size' => 'nullable',
-            'stock' => 'required|numeric',
+            // 'stock' => 'required|numeric',
             'cat_id' => 'required|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'child_cat_id' => 'nullable|exists:categories,id',
@@ -57,7 +59,10 @@ class ProductController extends Controller
             'condition' => 'required|in:default,new,hot',
             'price' => 'required|numeric',
             'discount' => 'nullable|numeric',
+            'size_stock' => 'nullable|array',
+            'size_stock.*' => 'nullable|numeric|min:0',
         ]);
+        // dd($validatedData);
 
         $slug = generateUniqueSlug($request->title, Product::class);
         $validatedData['slug'] = $slug;
@@ -69,7 +74,25 @@ class ProductController extends Controller
             $validatedData['size'] = '';
         }
 
+        if ($request->has('size_stock')) {
+            $sizeStocks = $request->input('size_stock');
+            $validatedData['stock'] = array_sum($sizeStocks);
+        } else {
+            $validatedData['stock'] = 0;
+        }
+        // dd($validatedData['stock']);
+
         $product = Product::create($validatedData);
+// dd($product);
+        if ($request->has('size_stock')) {
+            foreach ($request->input('size_stock') as $size => $stock) {
+                ProductSize::create([
+                    'product_id' => $product->id,
+                    'size' => $size,
+                    'stock' => $stock
+                ]);
+            }
+        }
 
         $message = $product
             ? 'Product Successfully added'
@@ -80,6 +103,78 @@ class ProductController extends Controller
             $message
         );
     }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'title' => 'required|string',
+            'summary' => 'required|string',
+            'description' => 'nullable|string',
+            'photo' => 'required|string',
+            'size' => 'nullable',
+            'cat_id' => 'required|exists:categories,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'child_cat_id' => 'nullable|exists:categories,id',
+            'is_featured' => 'sometimes|in:1',
+            'status' => 'required|in:active,inactive',
+            'condition' => 'required|in:default,new,hot',
+            'price' => 'required|numeric',
+            'discount' => 'nullable|numeric',
+            'size_stock' => 'nullable|array',
+            'size_stock.*' => 'nullable|numeric|min:0',
+            'stock' => 'nullable|numeric|min:0', // for Free Size
+        ]);
+
+        // Generate slug
+        $slug = generateUniqueSlug($request->title, Product::class);
+        $validatedData['slug'] = $slug;
+        $validatedData['is_featured'] = $request->input('is_featured', 0);
+
+        // Handle sizes
+        if ($request->has('size')) {
+            $validatedData['size'] = implode(',', $request->input('size'));
+        } else {
+            $validatedData['size'] = '';
+        }
+
+        // Stock calculation
+        if ($request->has('size') && in_array('Free Size', $request->size)) {
+            // Free Size product (no entry in product_sizes table)
+            $validatedData['stock'] = $request->input('stock', 0);
+        } elseif ($request->has('size_stock')) {
+            // Multi-size product
+            $sizeStocks = $request->input('size_stock');
+            $validatedData['stock'] = array_sum($sizeStocks);
+        } else {
+            $validatedData['stock'] = 0;
+        }
+
+        // Create Product
+        $product = Product::create($validatedData);
+
+        // Insert into product_sizes only if not Free Size
+        if ($request->has('size') && in_array('Free Size', $request->size)) {
+            // Do not insert anything into product_sizes
+        } elseif ($request->has('size_stock')) {
+            foreach ($request->input('size_stock') as $size => $stock) {
+                ProductSize::create([
+                    'product_id' => $product->id,
+                    'size' => $size,
+                    'stock' => $stock
+                ]);
+            }
+        }
+
+        $message = $product
+            ? 'Product Successfully added'
+            : 'Please try again!!';
+
+        return redirect()->route('product.index')->with(
+            $product ? 'success' : 'error',
+            $message
+        );
+    }
+
 
     /**
      * Display the specified resource.
@@ -115,7 +210,7 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update_old(Request $request, $id)
     {
         $product = Product::findOrFail($id);
 
@@ -125,7 +220,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'photo' => 'required|string',
             'size' => 'nullable',
-            'stock' => 'required|numeric',
+            // 'stock' => 'required|numeric',
             'cat_id' => 'required|exists:categories,id',
             'child_cat_id' => 'nullable|exists:categories,id',
             'is_featured' => 'sometimes|in:1',
@@ -134,8 +229,10 @@ class ProductController extends Controller
             'condition' => 'required|in:default,new,hot',
             'price' => 'required|numeric',
             'discount' => 'nullable|numeric',
+            'size_stock' => 'nullable|array',
+            'size_stock.*' => 'nullable|numeric|min:0',
         ]);
-
+// dd($validatedData);
         $validatedData['is_featured'] = $request->input('is_featured', 0);
 
         if ($request->has('size')) {
@@ -144,7 +241,21 @@ class ProductController extends Controller
             $validatedData['size'] = '';
         }
 
+        if ($request->has('size_stock')) {
+            $sizeStocks = $request->input('size_stock');
+            $validatedData['stock'] = array_sum($sizeStocks);
+        }
+
         $status = $product->update($validatedData);
+
+        if ($request->has('size_stock')) {
+            foreach ($request->input('size_stock') as $size => $stock) {
+                ProductSize::updateOrCreate(
+                    ['product_id' => $product->id, 'size' => $size],
+                    ['stock' => $stock]
+                );
+            }
+        }
 
         $message = $status
             ? 'Product Successfully updated'
@@ -155,6 +266,79 @@ class ProductController extends Controller
             $message
         );
     }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'title' => 'required|string',
+            'summary' => 'required|string',
+            'description' => 'nullable|string',
+            'photo' => 'required|string',
+            'size' => 'nullable',
+            // 'stock' => 'required|numeric',
+            'cat_id' => 'required|exists:categories,id',
+            'child_cat_id' => 'nullable|exists:categories,id',
+            'is_featured' => 'sometimes|in:1',
+            'brand_id' => 'nullable|exists:brands,id',
+            'status' => 'required|in:active,inactive',
+            'condition' => 'required|in:default,new,hot',
+            'price' => 'required|numeric',
+            'discount' => 'nullable|numeric',
+            'size_stock' => 'nullable|array',
+            'size_stock.*' => 'nullable|numeric|min:0',
+        ]);
+
+        $validatedData['is_featured'] = $request->input('is_featured', 0);
+
+        if ($product->is_featured) {
+            $product->text_color = $request->input('text_color', '#000000');       // default black
+            $product->discount_color = $request->input('discount_color', '#ff0000'); // default red
+        } else {
+            $product->text_color = null;
+            $product->discount_color = null;
+        }
+
+        if ($request->has('size')) {
+            $validatedData['size'] = implode(',', $request->input('size'));
+        } else {
+            $validatedData['size'] = '';
+        }
+
+        if ($request->has('size') && in_array('Free Size', $request->size)) {
+            $validatedData['stock'] = $request->input('stock', 0);
+
+        } elseif ($request->has('size_stock')) {
+            $sizeStocks = $request->input('size_stock');
+            $validatedData['stock'] = array_sum($sizeStocks);
+        } else {
+            $validatedData['stock'] = 0;
+        }
+
+        $status = $product->update($validatedData);
+
+        if ($request->has('size') && in_array('Free Size', $request->size)) {
+            ProductSize::where('product_id', $product->id)->delete();
+        } elseif ($request->has('size_stock')) {
+            foreach ($request->input('size_stock') as $size => $stock) {
+                ProductSize::updateOrCreate(
+                    ['product_id' => $product->id, 'size' => $size],
+                    ['stock' => $stock]
+                );
+            }
+        }
+
+        $message = $status
+            ? 'Product Successfully updated'
+            : 'Please try again!!';
+
+        return redirect()->route('product.index')->with(
+            $status ? 'success' : 'error',
+            $message
+        );
+    }
+
 
     /**
      * Remove the specified resource from storage.

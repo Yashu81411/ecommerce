@@ -39,6 +39,9 @@
 
     // STORAGE LINKED ROUTE
     Route::get('storage-link',[AdminController::class,'storageLink'])->name('storage.link');
+    Route::post('/razorpay/success', [OrderController::class, 'razorpaySuccess'])->name('razorpay.success');
+    Route::post('/razorpay/webhook', [OrderController::class, 'handleRazorpayWebhook'])->name('razorpay.webhook');
+    Route::get('/payment/cancel', [OrderController::class, 'paymentCancel'])->name('payment.cancel');
 
 
     Auth::routes(['register' => false]);
@@ -49,7 +52,7 @@
 
     Route::get('user/register', [FrontendController::class, 'register'])->name('register.form');
     Route::post('user/register', [FrontendController::class, 'registerSubmit'])->name('register.submit');
-   
+
     // Reset password
     Route::get('password/reset', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
@@ -91,6 +94,7 @@
     })->name('wishlist');
     Route::get('/wishlist/{slug}', [WishlistController::class, 'wishlist'])->name('add-to-wishlist')->middleware('user');
     Route::get('wishlist-delete/{id}', [WishlistController::class, 'wishlistDelete'])->name('wishlist-delete');
+    Route::get('/wishlist-size/{slug}', [WishlistController::class, 'wishlistsize'])->name('wishlist-size');
     Route::post('cart/order', [OrderController::class, 'store'])->name('cart.order');
     Route::get('order/pdf/{id}', [OrderController::class, 'pdf'])->name('order.pdf');
     Route::get('/income', [OrderController::class, 'incomeChart'])->name('product.order.income');

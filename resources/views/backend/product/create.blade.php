@@ -34,7 +34,7 @@
 
         <div class="form-group">
           <label for="is_featured">Is Featured</label><br>
-          <input type="checkbox" name='is_featured' id='is_featured' value='1' checked> Yes                        
+          <input type="checkbox" name='is_featured' id='is_featured' value='1' checked> Yes
         </div>
               {{-- {{$categories}} --}}
 
@@ -81,6 +81,7 @@
               <option value="M">Medium (M)</option>
               <option value="L">Large (L)</option>
               <option value="XL">Extra Large (XL)</option>
+              <option value="Free Size">Free Size</option>
           </select>
         </div>
 
@@ -106,13 +107,50 @@
           </select>
         </div>
 
-        <div class="form-group">
+        {{-- <div class="form-group">
           <label for="stock">Quantity <span class="text-danger">*</span></label>
           <input id="quantity" type="number" name="stock" min="0" placeholder="Enter quantity"  value="{{old('stock')}}" class="form-control">
           @error('stock')
           <span class="text-danger">{{$message}}</span>
           @enderror
-        </div>
+        </div> --}}
+{{-- <div class="form-group">
+  <label>Stock by Size</label>
+  <div class="row">
+      @php
+          $sizes = ['S', 'M', 'L', 'XL'];
+      @endphp
+
+      @foreach($sizes as $size)
+          <div class="col-md-3">
+              <label>{{ $size }}</label>
+              <input type="number" name="size_stock[{{ $size }}]" min="0" class="form-control"
+                     value="{{ old('size_stock.'.$size) ?? 0 }}">
+          </div>
+      @endforeach
+  </div>
+</div> --}}
+<div class="form-group" id="stock_by_size_group">
+    <label>Stock by Size</label>
+    <div class="row">
+        @php
+            $sizes = ['S', 'M', 'L', 'XL'];
+        @endphp
+        @foreach ($sizes as $size)
+            <div class="col-md-3">
+                <label>{{ $size }}</label>
+                <input type="number" name="size_stock[{{ $size }}]" min="0" class="form-control" value="0">
+            </div>
+        @endforeach
+    </div>
+</div>
+
+<div class="form-group d-none" id="total_stock_group">
+    <label for="total_stock">Total Stock <span class="text-danger">*</span></label>
+    <input id="total_stock" type="number" name="stock" min="0" class="form-control" placeholder="Enter total stock" value="{{ old('stock') }}">
+</div>
+
+
         <div class="form-group">
           <label for="inputPhoto" class="col-form-label">Photo <span class="text-danger">*</span></label>
           <div class="input-group">
@@ -128,7 +166,7 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
-        
+
         <div class="form-group">
           <label for="status" class="col-form-label">Status <span class="text-danger">*</span></label>
           <select name="status" class="form-control">
@@ -222,4 +260,30 @@
     }
   })
 </script>
+
+<script>
+$(document).ready(function () {
+    function toggleStockFields() {
+        let selectedSizes = $('select[name="size[]"]').val() || [];
+
+        if (selectedSizes.includes('Free Size')) {
+            // If Free Size selected
+            $('#stock_by_size_group').addClass('d-none');
+            $('#total_stock_group').removeClass('d-none');
+        } else {
+            $('#stock_by_size_group').removeClass('d-none');
+            $('#total_stock_group').addClass('d-none');
+        }
+    }
+
+    // Initial check on page load
+    toggleStockFields();
+
+    // Recheck on change
+    $('select[name="size[]"]').on('changed.bs.select', function () {
+        toggleStockFields();
+    });
+});
+</script>
+
 @endpush

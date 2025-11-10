@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Shipping;
+use App\Models\ProductSize;
 use App\User;
 use PDF;
 use Notification;
 use Helper;
 use Illuminate\Support\Str;
 use App\Notifications\StatusNotification;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 
 class OrderController extends Controller
 {
@@ -121,13 +125,35 @@ class OrderController extends Controller
         if(request('payment_method')=='paypal'){
             $order_data['payment_method']='paypal';
             $order_data['payment_status']='paid';
-        }
-        else{
+        } elseif ($request->payment_method == 'razorpay') {
+            $order_data['payment_method'] = 'razorpay';
+            $order_data['payment_status'] = 'unpaid';
+        }else{
             $order_data['payment_method']='cod';
-            $order_data['payment_status']='Unpaid';
+            $order_data['payment_status']='unpaid';
         }
         $order->fill($order_data);
         $status=$order->save();
+
+        if ($order->payment_method == 'razorpay') {
+            $razorpayOrder = $this->createRazorpayOrder($order->total_amount, $order->order_number);
+
+            if (!$razorpayOrder || !isset($razorpayOrder['id'])) {
+                return back()->with('error', 'Razorpay order creation failed.');
+            }
+
+            // save Razorpay order_id for verification
+            $order->session_id = $razorpayOrder['id'];
+            $order->save();
+
+            return view('frontend.razorpay_checkout', [
+                'order' => $order,
+                'razorpayOrder' => $razorpayOrder,
+                'razorpayKey' => 'rzp_test_RaTrmZW6PsHUdp',
+                'total_amount' => $order->total_amount
+            ]);
+        }
+
         if($order)
         // dd($order->id);
         $users=User::where('role','admin')->first();
@@ -146,17 +172,212 @@ class OrderController extends Controller
         }
         Cart::where('user_id', auth()->user()->id)->where('order_id', null)->update(['order_id' => $order->id]);
 
-        // dd($users);        
+        // dd($users);
         request()->session()->flash('success','Your product successfully placed in order');
         return redirect()->route('home');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+        private function createRazorpayOrder($amount, $receipt)
+        {
+            // Direct Razorpay credentials
+            $key = 'rzp_test_RaTrmZW6PsHUdp';
+            $secret = 'GQGxPh3z0lyvafYyQJfBk8u6';
+
+            try {
+                $payload = [
+                    'amount' => (int) round($amount * 100),
+                    'currency' => 'INR',
+                    'receipt' => $receipt,
+                    'payment_capture' => 1,
+                ];
+
+                $response = Http::withBasicAuth($key, $secret)
+                                ->post('https://api.razorpay.com/v1/orders', $payload);
+
+                if ($response->failed()) {
+                    Log::error('Razorpay order creation failed: ' . $response->status() . ' - ' . $response->body());
+                    return ['error' => 'Razorpay API call failed'];
+                }
+
+                return $response->json();
+
+            } catch (\Exception $e) {
+                Log::error('Razorpay create order exception: ' . $e->getMessage());
+                return ['error' => $e->getMessage()];
+            }
+        }
+
+    public function razorpaySuccess(Request $request)
+    {
+        try {
+            $orderId = $request->input('razorpay_order_id');
+            $paymentId = $request->input('razorpay_payment_id');
+            $signature = $request->input('razorpay_signature');
+
+
+            if (!$orderId || !$paymentId || !$signature) {
+                Log::warning('Razorpay callback missing data.', $request->all());
+                return redirect()->route('home')->with('error', 'Invalid payment details received.');
+            }
+
+            $razorpaySecret = 'GQGxPh3z0lyvafYyQJfBk8u6';
+
+
+            $generatedSignature = hash_hmac(
+                'sha256',
+                $orderId . '|' . $paymentId,
+                $razorpaySecret
+            );
+
+
+            if (!hash_equals($generatedSignature, $signature)) {
+                Log::error("Signature mismatch for order: $orderId");
+                return redirect()->route('home')->with('error', 'Payment verification failed.');
+            }
+
+
+            $order = Order::where('session_id', $orderId)->first();
+
+            if (!$order) {
+                Log::error("Order not found for Razorpay order_id: $orderId");
+                return redirect()->route('home')->with('error', 'Order not found.');
+            }
+
+
+            $order->update([
+                'payment_status' => 'paid',
+                'status' => 'process',
+                'updated_at' => now(),
+            ]);
+
+            Log::info("Razorpay payment successful. Order updated: {$order->order_number}");
+
+
+            session()->forget(['cart', 'coupon']);
+
+            return redirect()->route('home')->with('success', 'Payment successful!');
+
+        } catch (\Exception $e) {
+            Log::error('Razorpay success handler error: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Something went wrong while processing payment.');
+        }
+    }
+
+
+
+    public function handleRazorpayWebhook(Request $request)
+    {
+        $webhookBody = $request->getContent();
+        $webhookSignature = $request->header('X-Razorpay-Signature');
+        $razorpaySecret = 'GQGxPh3z0lyvafYyQJfBk8u6';
+
+        try {
+            // Normalize all line endings (\r\n -> \n) and remove any trailing newlines
+            $normalizedBody = preg_replace('/\r\n?/', "\n", $webhookBody);
+            $normalizedBody = rtrim($normalizedBody, "\r\n");
+
+            // Log raw and normalized bodies for debugging
+            file_put_contents(storage_path('logs/raw_body_debug.txt'), $webhookBody);
+            file_put_contents(storage_path('logs/normalized_body_debug.txt'), $normalizedBody);
+            file_put_contents(storage_path('logs/webhook_raw_signature.txt'), $webhookSignature);
+
+            // Verify signature
+            $expectedSignature = hash_hmac('sha256', $normalizedBody, $razorpaySecret);
+            file_put_contents(storage_path('logs/webhook_expected_signature.txt'), $expectedSignature);
+
+            if (!hash_equals($expectedSignature, $webhookSignature)) {
+                file_put_contents(storage_path('logs/webhook_debug.txt'), "Signature mismatch\n", FILE_APPEND);
+                return response()->json(['status' => 'invalid signature'], 400);
+            }
+
+            // Parse payload
+            $payload = json_decode($normalizedBody, true);
+            if (!$payload || !isset($payload['event'])) {
+                file_put_contents(storage_path('logs/webhook_debug.txt'), "Invalid payload\n", FILE_APPEND);
+                return response()->json(['status' => 'invalid payload'], 400);
+            }
+
+            // Handle events
+            switch ($payload['event']) {
+
+                // ✅ PAYMENT SUCCESS EVENT
+                case 'payment.captured':
+                    $paymentData = $payload['payload']['payment']['entity'] ?? null;
+                    if (!$paymentData) {
+                        return response()->json(['status' => 'missing payment data'], 400);
+                    }
+
+                    $orderId = $paymentData['order_id'] ?? null;
+                    $paymentId = $paymentData['id'] ?? null;
+
+                    $order = Order::where('session_id', $orderId)->first();
+                    if (!$order) {
+                        return response()->json(['status' => 'order not found'], 404);
+                    }
+
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'status' => 'process',
+                        'updated_at' => now(),
+                    ]);
+
+                    file_put_contents(storage_path('logs/webhook_debug.txt'),
+                        "Payment captured successfully for Order: $orderId\n", FILE_APPEND);
+                    break;
+
+                // ❌ PAYMENT FAILURE EVENT
+                case 'payment.failed':
+                    $paymentData = $payload['payload']['payment']['entity'] ?? null;
+                    $orderId = $paymentData['order_id'] ?? null;
+
+                    if ($order = Order::where('session_id', $orderId)->first()) {
+                        $order->update([
+                            'payment_status' => 'unpaid',
+                            'status' => 'cancel',
+                            'updated_at' => now(),
+                        ]);
+
+                        file_put_contents(storage_path('logs/webhook_debug.txt'),
+                            "Payment failed for Order: $orderId\n", FILE_APPEND);
+                    } else {
+                        file_put_contents(storage_path('logs/webhook_debug.txt'),
+                            "Payment failed but order not found for: $orderId\n", FILE_APPEND);
+                    }
+                    break;
+
+                // 🟡 UNHANDLED EVENT
+                default:
+                    file_put_contents(storage_path('logs/webhook_debug.txt'),
+                        "Unhandled event: {$payload['event']}\n", FILE_APPEND);
+                    break;
+            }
+
+            return response()->json(['status' => 'success'], 200);
+
+        } catch (\Exception $e) {
+            file_put_contents(storage_path('logs/webhook_debug.txt'),
+                "Error: " . $e->getMessage() . "\n", FILE_APPEND);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+    public function paymentCancel()
+    {
+        try {
+            session()->forget(['cart', 'coupon']);
+
+            Log::info('User cancelled payment process.');
+
+            return view('frontend.payment_cancel');
+
+        } catch (\Exception $e) {
+            Log::error('Error showing payment cancel page: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Something went wrong while cancelling the payment.');
+        }
+    }
+
     public function show($id)
     {
         $order=Order::find($id);
@@ -190,13 +411,27 @@ class OrderController extends Controller
             'status'=>'required|in:new,process,delivered,cancel'
         ]);
         $data=$request->all();
-        // return $request->status;
-        if($request->status=='delivered'){
-            foreach($order->cart as $cart){
-                $product=$cart->product;
-                // return $product;
-                $product->stock -=$cart->quantity;
-                $product->save();
+
+        // if($request->status=='delivered'){
+        //     foreach($order->cart as $cart){
+        //         $product=$cart->product;
+        //         // return $product;
+        //         $product->stock -=$cart->quantity;
+        //         $product->save();
+        //     }
+        // }
+        if ($request->status == 'delivered') {
+            foreach ($order->cart as $cart) {
+                // Find matching size stock entry
+                $sizeStock = ProductSize::where('product_id', $cart->product_id)
+                    ->where('size', $cart->size)
+                    ->first();
+
+                // Reduce stock for that specific size
+                if ($sizeStock) {
+                    $sizeStock->stock = max(0, $sizeStock->stock - $cart->quantity);
+                    $sizeStock->save();
+                }
             }
         }
         $status=$order->fill($data)->save();
@@ -250,17 +485,17 @@ class OrderController extends Controller
             elseif($order->status=="process"){
                 request()->session()->flash('success','Your order is under processing please wait.');
                 return redirect()->route('home');
-    
+
             }
             elseif($order->status=="delivered"){
                 request()->session()->flash('success','Your order is successfully delivered.');
                 return redirect()->route('home');
-    
+
             }
             else{
                 request()->session()->flash('error','Your order canceled. please try again');
                 return redirect()->route('home');
-    
+
             }
         }
         else{

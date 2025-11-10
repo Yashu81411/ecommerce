@@ -29,8 +29,9 @@
             <td>{{$order->first_name}} {{$order->last_name}}</td>
             <td>{{$order->email}}</td>
             <td>{{$order->quantity}}</td>
-            <td>${{$order->shipping->price}}</td>
-            <td>${{number_format($order->total_amount,2)}}</td>
+            {{-- <td>₹{{$order->shipping->price}}</td> --}}
+            <td>₹{{ $order->shipping->price ?? 0 }}</td>
+            <td>₹{{number_format($order->total_amount,2)}}</td>
             <td>
                 @if($order->status=='new')
                   <span class="badge badge-primary">{{$order->status}}</span>
@@ -82,11 +83,12 @@
                           $shipping_charge=DB::table('shippings')->where('id',$order->shipping_id)->pluck('price');
                       @endphp
                         <td>Shipping Charge</td>
-                        <td> :${{$order->shipping->price}}</td>
+                        {{-- <td> :₹{{$order->shipping->price}}</td> --}}
+                        <td> :₹{{ $order->shipping->price ?? 0 }}</td>
                     </tr>
                     <tr>
                         <td>Total Amount</td>
-                        <td> : $ {{number_format($order->total_amount,2)}}</td>
+                        <td> : ₹ {{number_format($order->total_amount,2)}}</td>
                     </tr>
                     <tr>
                       <td>Payment Method</td>
