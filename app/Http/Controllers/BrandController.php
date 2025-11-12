@@ -36,28 +36,28 @@ class BrandController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'title' => 'required|string',
-            'status' => 'required|in:active,inactive',
-        ]);
+   public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'title' => 'required|string',
+        'status' => 'required|in:active,inactive',
+        'name' => 'nullable|string|max:255',
+        'contact_number' => 'nullable|string|max:20',
+        'alt_number' => 'nullable|string|max:20',
+        'email' => 'nullable|email|unique:brands,email',
+        'address' => 'nullable|string',
+    ]);
 
-        $slug = generateUniqueSlug($request->title, Brand::class);
+    $validatedData['slug'] = generateUniqueSlug($request->title, Brand::class);
 
-        $validatedData['slug'] = $slug;
+    $brand = Brand::create($validatedData);
 
-        $brand = Brand::create($validatedData);
+    return redirect()->route('brand.index')->with(
+        $brand ? 'success' : 'error',
+        $brand ? 'Brand successfully created' : 'Error, please try again'
+    );
+}
 
-        $message = $brand
-            ? 'Brand successfully created'
-            : 'Error, Please try again';
-
-        return redirect()->route('brand.index')->with(
-            $brand ? 'success' : 'error',
-            $message
-        );
-    }
 
     /**
      * Display the specified resource.
@@ -97,29 +97,31 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        $brand = Brand::find($id);
+{
+    $brand = Brand::find($id);
 
-        if (!$brand) {
-            return redirect()->back()->with('error', 'Brand not found');
-        }
-
-        $validatedData = $request->validate([
-            'title' => 'required|string',
-            'status' => 'required|in:active,inactive',
-        ]);
-
-        $status = $brand->update($validatedData);
-
-        $message = $status
-            ? 'Brand successfully updated'
-            : 'Error, Please try again';
-
-        return redirect()->route('brand.index')->with(
-            $status ? 'success' : 'error',
-            $message
-        );
+    if (!$brand) {
+        return redirect()->back()->with('error', 'Brand not found');
     }
+
+    $validatedData = $request->validate([
+        'title' => 'required|string',
+        'status' => 'required|in:active,inactive',
+        'name' => 'nullable|string|max:255',
+        'contact_number' => 'nullable|string|max:20',
+        'alt_number' => 'nullable|string|max:20',
+        'email' => 'nullable|email|unique:brands,email,'.$brand->id,
+        'address' => 'nullable|string',
+    ]);
+
+    $status = $brand->update($validatedData);
+
+    return redirect()->route('brand.index')->with(
+        $status ? 'success' : 'error',
+        $status ? 'Brand successfully updated' : 'Error, please try again'
+    );
+}
+
 
     /**
      * Remove the specified resource from storage.

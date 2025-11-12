@@ -36,6 +36,17 @@
         return redirect()->back();
     })->name('cache.clear');
 
+    Route::get('/clear', function() {
+
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('config:cache');
+    Artisan::call('view:clear');
+ 
+    return "Cleared!";
+ 
+ });
+    
 
     // STORAGE LINKED ROUTE
     Route::get('storage-link',[AdminController::class,'storageLink'])->name('storage.link');
@@ -144,6 +155,9 @@
         Route::resource('banner', 'BannerController');
         // Brand
         Route::resource('brand', 'BrandController');
+
+        Route::get('/brand/{id}/show', [App\Http\Controllers\BrandController::class, 'show'])->name('brand.show');
+
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('admin-profile');
         Route::post('/profile/{id}', [AdminController::class, 'profileUpdate'])->name('profile-update');

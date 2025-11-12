@@ -17,36 +17,54 @@
         @if(count($brands)>0)
         <table class="table table-bordered" id="banner-dataTable" width="100%" cellspacing="0">
           <thead>
-            <tr>
-              <th>S.N.</th>
-              <th>Title</th>
-              <th>Slug</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tfoot>
-            <tr>
-              <th>S.N.</th>
-              <th>Title</th>
-              <th>Slug</th>
-              <th>Status</th>
-              <th>Action</th>
-              </tr>
-          </tfoot>
+<tr>
+    <th>ID</th>
+    <th>Title</th>
+    <th>Brand Name</th>
+    <th>Phone</th>
+    <th>Alt Phone</th>
+    <th>Email</th>
+    <th>Address</th>
+    <th>Slug</th>
+    <th>Status</th>
+    <th>Action</th>
+</tr>
+</thead>
+
+         <tfoot>
+<tr>
+    <th>ID</th>
+    <th>Title</th>
+    <th>Brand Name</th>
+    <th>Phone</th>
+    <th>Alt Phone</th>
+    <th>Email</th>
+    <th>Address</th>
+    <th>Slug</th>
+    <th>Status</th>
+    <th>Action</th>
+</tr>
+</tfoot>
+
           <tbody>
             @foreach($brands as $brand)   
-                <tr>
-                    <td>{{$brand->id}}</td>
-                    <td>{{$brand->title}}</td>
-                    <td>{{$brand->slug}}</td>
-                    <td>
-                        @if($brand->status=='active')
-                            <span class="badge badge-success">{{$brand->status}}</span>
-                        @else
-                            <span class="badge badge-warning">{{$brand->status}}</span>
-                        @endif
-                    </td>
+               <tr>
+    <td>{{$brand->id}}</td>
+    <td>{{$brand->title}}</td>
+    <td>{{$brand->name ?? '-'}}</td>
+    <td>{{$brand->contact_number ?? '-'}}</td>
+    <td>{{$brand->alt_number ?? '-'}}</td>
+    <td>{{$brand->email ?? '-'}}</td>
+    <td>{{ Str::limit($brand->address, 30) ?? '-' }}</td>
+    <td>{{$brand->slug}}</td>
+
+    <td>
+        @if($brand->status=='active')
+            <span class="badge badge-success">{{$brand->status}}</span>
+        @else
+            <span class="badge badge-warning">{{$brand->status}}</span>
+        @endif
+    </td>
                     <td>
                         <a href="{{route('brand.edit',$brand->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
                         <form method="POST" action="{{route('brand.destroy',[$brand->id])}}">
@@ -54,6 +72,14 @@
                           @method('delete')
                               <button class="btn btn-danger btn-sm dltBtn" data-id={{$brand->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
                         </form>
+                        <a href="{{ route('brand.show', $brand->id) }}" 
+   class="btn btn-info btn-sm float-left mr-1" 
+   style="height:30px; width:30px;border-radius:50%" 
+   data-toggle="tooltip" 
+   title="View Merchant">
+   <i class="fas fa-eye"></i>
+</a>
+
                     </td>
                     {{-- Delete Modal --}}
                     {{-- <div class="modal fade" id="delModal{{$user->id}}" tabindex="-1" role="dialog" aria-labelledby="#delModal{{$user->id}}Label" aria-hidden="true">

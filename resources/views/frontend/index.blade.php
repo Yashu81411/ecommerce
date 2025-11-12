@@ -337,7 +337,7 @@
                             <!-- Start Single Tab -->
                             @if ($product_lists)
                                 @foreach ($product_lists as $key => $product)
-                                    <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}">
+                                    <div class="col-sm-6 col-md-6 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}">
                                         <div class="single-product">
                                             <div class="product-img">
                                                 <a href="{{ route('product-detail', $product->slug) }}">
