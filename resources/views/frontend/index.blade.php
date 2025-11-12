@@ -295,7 +295,7 @@
             </div>
     </section>
     <!-- End Small Banner -->
-
+ 
     <!-- Start Product Area -->
     <div class="product-area section">
         <div class="container">
@@ -337,8 +337,8 @@
                             <!-- Start Single Tab -->
                             @if ($product_lists)
                                 @foreach ($product_lists as $key => $product)
-                                    <div class="col-sm-6 col-md-6 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}">
-                                        <div class="single-product">
+                                    <div class="col-sm-6 col-md-6 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}" style="min-height: 650px;">
+                                        <div class="single-product" style=" padding: 1.25rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
                                             <div class="product-img">
                                                 <a href="{{ route('product-detail', $product->slug) }}">
                                                     @php
@@ -347,9 +347,10 @@
                                                         // dd($photo);
                                                     @endphp
                                                     <img class="default-img" src="{{ $photo[0] }}"
-                                                        alt="{{ $photo[0] }}">
+                                                        alt="{{ $photo[0] }}" style="  border-radius: 2.5rem;" >
+                                                    
                                                     <img class="hover-img" src="{{ $photo[0] }}"
-                                                        alt="{{ $photo[0] }}">
+                                                        alt="{{ $photo[0] }}" style="  border-radius: 2.5rem;">
                                                     @if ($product->stock <= 0)
                                                         <span class="out-of-stock">Sale out</span>
                                                     @elseif($product->condition == 'new')
