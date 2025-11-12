@@ -123,6 +123,30 @@ class BrandController extends Controller
 }
 
 
+
+public function show_merchant($id)
+{
+    $brand = Brand::with(['products.carts.order'])->findOrFail($id);
+
+    // Gather order data through brand’s products
+    $orders = \App\Models\Order::whereHas('cart', function ($q) use ($brand) {
+        $q->whereIn('product_id', $brand->products->pluck('id'));
+    })->with('cart.product')->get();
+
+    // Calculate metrics
+    $totalOrders = $orders->count();
+    $totalSales = $orders->sum('total_amount');
+
+    $monthlyOrders = $orders->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->count();
+    $monthlySales = $orders->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->sum('total_amount');
+
+    return view('backend.brand.show', compact(
+        'brand', 'orders', 'totalOrders', 'monthlyOrders', 'totalSales', 'monthlySales'
+    ));
+}
+
+
+
     /**
      * Remove the specified resource from storage.
      *

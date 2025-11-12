@@ -156,7 +156,7 @@
         // Brand
         Route::resource('brand', 'BrandController');
 
-        Route::get('/brand/{id}/show', [App\Http\Controllers\BrandController::class, 'show'])->name('brand.show');
+        Route::get('/brand/{id}/show', [App\Http\Controllers\BrandController::class, 'show_merchant'])->name('brand.show');
 
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('admin-profile');
