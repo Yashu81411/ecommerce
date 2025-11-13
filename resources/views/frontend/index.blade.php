@@ -215,7 +215,7 @@
 
     <!-- Slider Area -->
     @if (count($banners) > 0)
-        <section id="Gslider" class="carousel slide" data-ride="carousel">
+       <section id="Gslider" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
                 @foreach ($banners as $key => $banner)
                     <li data-target="#Gslider" data-slide-to="{{ $key }}" class="{{ $key == 0 ? 'active' : '' }}">
@@ -227,7 +227,7 @@
                 @foreach ($banners as $key => $banner)
                     <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
                         <img class="first-slide" src="{{ $banner->photo }}" alt="First slide">
-                        <div class="carousel-caption d-none d-md-block text-left">
+                        <div class="carousel-caption d-md-block text-left">
                             <h1 class="wow fadeInDown">{{ $banner->title }}</h1>
                             <p>{!! html_entity_decode($banner->description) !!}</p>
                             <a class="btn btn-lg ws-btn wow fadeInUpBig" href="{{ route('product-grids') }}"
@@ -261,7 +261,7 @@
                     @if ($category_lists)
                         @foreach ($category_lists as $cat)
                             @if ($cat->is_parent == 1)
-                                <!-- Single Banner  -->
+                                
                                 <div class="col-lg-4 col-md-6 col-12">
                                     <div class="single-banner">
                                         @if ($cat->photo)
@@ -276,14 +276,14 @@
                                     </div>
                                 </div>
                             @endif
-                            <!-- /End Single Banner  -->
+                            
                         @endforeach
 
 
 
                         @foreach ($category_lists as $cat)
                             @if ($cat->is_parent == 1)
-                                <!-- Single Banner  -->
+                              
                                 <div class="col-lg-4 col-md-6 col-12">
                                     <div class="single-banner">
                                         @if ($cat->photo)
@@ -298,7 +298,7 @@
                                     </div>
                                 </div>
                             @endif
-                            <!-- /End Single Banner  -->
+                           
                         @endforeach
 
                     @endif
@@ -322,27 +322,46 @@
                     <div class="product-info">
                         <div class="nav-main">
                             <!-- Tab Nav -->
-                            <ul class="nav nav-tabs filter-tope-group" id="myTab" role="tablist">
-                                @php
-                                    $categories = DB::table('categories')
-                                        ->where('status', 'active')
-                                        ->where('is_parent', 1)
-                                        ->get();
-                                    // dd($categories);
-                                @endphp
-                                @if ($categories)
-                                    <button class="btn" style="background:black"data-filter="*">
-                                        All Products
-                                    </button>
-                                    @foreach ($categories as $key => $cat)
-                                        <button class="btn"
-                                            style="background:none;color:black;"data-filter=".{{ $cat->id }}">
-                                            {{ $cat->title }}
-                                        </button>
-                                    @endforeach
-                                @endif
-                            </ul>
+                          <ul class="nav nav-tabs filter-tope-group" id="myTab" role="tablist"
+    style="
+        display:flex;
+        flex-wrap:nowrap;
+        overflow-x:auto;
+        overflow-y:hidden;
+        white-space:nowrap;
+        gap:10px;
+        padding-bottom:6px;
+        scrollbar-width:none;
+    "
+>
+    @php
+        $categories = DB::table('categories')
+            ->where('status', 'active')
+            ->where('is_parent', 1)
+            ->get();
+    @endphp
+
+    @if ($categories)
+        <button class="btn"
+            style="background:black;color:white;flex:0 0 auto;"
+            data-filter="*">
+            All Products
+        </button>
+
+        @foreach ($categories as $key => $cat)
+            <button class="btn"
+                style="background:white;color:black;border:1px solid #ccc;flex:0 0 auto;"
+                data-filter=".{{ $cat->id }}">
+                {{ $cat->title }}
+            </button>
+        @endforeach
+    @endif
+</ul>
+
                             <!--/ End Tab Nav -->
+
+                            
+                         
                         </div>
                         <div class="tab-content isotope-grid" id="myTabContent">
                             <!-- Start Single Tab -->
@@ -424,12 +443,12 @@
     $featured=DB::table('products')->where('is_featured',1)->where('status','active')->orderBy('id','DESC')->limit(1)->get();
 @endphp --}}
     <!-- Start Midium Banner  -->
-    <section class="midium-banner">
+    <!-- <section class="midium-banner">
         <div class="container">
             <div class="row">
                 @if ($featured)
                     @foreach ($featured as $data)
-                        <!-- Single Banner  -->
+                        
                         <div class="col-lg-6 col-md-6 col-12">
                             <div class="single-banner">
                                 @php
@@ -448,12 +467,12 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- /End Single Banner  -->
+                       
                     @endforeach
                 @endif
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- End Midium Banner -->
 
     <!-- Start Most Popular -->
@@ -522,96 +541,106 @@
     </div>
     <!-- End Most Popular Area -->
 
-    <!-- Start Shop Home List  -->
-    <section class="shop-home-list section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-12">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="shop-section-title">
-                                <h1>Latest Items</h1>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        @php
-                            $product_lists = DB::table('products')
-                                ->where('status', 'active')
-                                ->orderBy('id', 'DESC')
-                                ->limit(6)
-                                ->get();
-                        @endphp
-                        @foreach ($product_lists as $product)
-                            <div class="col-md-4">
-                                <!-- Start Single List  -->
-                                <div class="single-list">
-                                    <div class="row">
-                                        <div class="col-lg-6 col-md-6 col-12">
-                                            <div class="list-image overlay">
-                                                @php
-                                                    $photo = explode(',', $product->photo);
-                                                    // dd($photo);
-                                                @endphp
-                                                <img src="{{ $photo[0] }}" alt="{{ $photo[0] }}">
-                                                {{-- <a href="{{route('add-to-cart',$product->slug)}}" class="buy"><i class="fa fa-shopping-bag"></i></a> --}}
-                                                <div class="buy-size-overlay">
-                                                    @if ($product->size)
-                                                        @php
-                                                            $sizes = explode(',', $product->size);
-                                                            $productSizes = DB::table('product_sizes')
-                                                                ->where('product_id', $product->id)
-                                                                ->pluck('stock', 'size');
-                                                        @endphp
-                                                        @foreach ($sizes as $size)
-                                                            @php
-                                                                $sizeTrimmed = trim($size);
-                                                                $sizeStock = $productSizes[$sizeTrimmed] ?? 0;
-                                                                //  if ($sizeTrimmed === 'Free Size') {
-                                                                //     $sizeStock = $product->stock ?? 0;
-                                                                // } else {
-                                                                //     $sizeStock = $productSizes[$sizeTrimmed] ?? 0;
-                                                                // }
-                                                            @endphp
+<div class="custom-marquee">
+    <div class="marquee-content">
+        🛒 Buy From Your Favourite Merchant • 💯 Best Quality Guaranteed • 🚚 Fast Delivery • 🔥 Hot Deals Everyday • 🎉 Shop Now & Save More!
+    </div>
+</div>
+<style>
+       .custom-marquee {
+    background: #000;
+    color: #fff;
+    padding: 10px 0;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+}
 
-                                                            @if ($sizeStock > 0)
-                                                                <form action="{{ route('single-add-to-cart') }}"
-                                                                    method="POST" style="display:inline;">
-                                                                    @csrf
-                                                                    <input type="hidden" name="slug"
-                                                                        value="{{ $product->slug }}">
-                                                                    <input type="hidden" name="size"
-                                                                        value="{{ trim($size) }}">
-                                                                    <input type="hidden" name="quant[1]" value="1">
-                                                                    <button type="submit"
-                                                                        class="size-btn">{{ strtoupper(trim($size)) }}</button>
-                                                                </form>
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                </div>
+.marquee-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll-left 12s linear infinite;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
 
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-md-6 col-12 no-padding">
-                                            <div class="content">
-                                                <h4 class="title"><a href="#">{{ $product->title }}</a></h4>
-                                                <p class="price with-discount">₹{{ number_format($product->discount, 2) }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- End Single List  -->
-                            </div>
-                        @endforeach
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
 
-                    </div>
+/* MOBILE text size */
+@media (max-width: 576px) {
+    .marquee-content {
+        font-size: 14px;
+    }
+}
+</style>
+    <!-- Start Latest Items Carousel -->
+<div class="product-area most-popular section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-title">
+                    <h2>Latest Items</h2>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- End Shop Home List  -->
+        <div class="row">
+            <div class="col-12">
+                <div class="owl-carousel popular-slider">
+                    @foreach ($product_lists as $product)
+                        <!-- Start Single Product -->
+                        <div class="single-product">
+                            <div class="product-img">
+                                <a href="{{ route('product-detail', $product->slug) }}">
+                                    @php
+                                        $photo = explode(',', $product->photo);
+                                    @endphp
+                                    <img class="default-img" src="{{ $photo[0] }}" alt="{{ $photo[0] }}">
+                                    <img class="hover-img" src="{{ $photo[0] }}" alt="{{ $photo[0] }}">
+                                </a>
+                                <div class="button-head">
+                                    <div class="product-action">
+                                        <a data-toggle="modal" data-target="#{{ $product->id }}"
+                                            title="Quick View" href="#"><i class=" ti-eye"></i><span>Quick Shop</span></a>
+                                        <a title="Wishlist"
+                                            href="{{ route('add-to-wishlist', $product->slug) }}"><i
+                                                class=" ti-heart "></i><span>Add to Wishlist</span></a>
+                                    </div>
+                                    <div class="product-action-2">
+                                        <a href="{{ route('add-to-cart', $product->slug) }}">Add to cart</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product-content">
+                                <h3><a href="{{ route('product-detail', $product->slug) }}">{{ $product->title }}</a></h3>
+                                <div class="product-price">
+                                    <span class="old">₹{{ number_format($product->price, 2) }}</span>
+                                    @php
+                                        $after_discount = $product->price - ($product->price * $product->discount) / 100;
+                                    @endphp
+                                    <span>₹{{ number_format($after_discount, 2) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Single Product -->
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Latest Items Carousel -->
+
+
+ 
+   
 
     <!-- Start Shop Blog  -->
     <section class="shop-blog section">
@@ -890,7 +919,7 @@
     <script type='text/javascript'
         src='https://platform-api.sharethis.com/js/sharethis.js#property=5f2e5abf393162001291e431&product=inline-share-buttons'
         async='async'></script> --}}
-    <style>
+   <style>
         /* Banner Sliding */
         #Gslider .carousel-inner {
             background: #000000;
@@ -926,6 +955,43 @@
         #Gslider .carousel-indicators {
             bottom: 70px;
         }
+
+        @media (max-width: 576px) {
+    #Gslider .carousel-inner {
+        height: 100%; /* Mobile-optimized height */
+    }
+
+    #Gslider .carousel-caption {
+        bottom: 15% !important; /* Move caption into view properly */
+        padding: 0 15px;
+        text-align: left;
+    } 
+
+    #Gslider .carousel-caption h1 {
+        font-size: 12px !important;
+        line-height: 1.3;
+    }
+
+    #Gslider .carousel-caption p {
+        font-size: 13px;
+        line-height: 1.4;
+        margin: 10px 0;
+    }
+
+    /* Button Resize */
+    #Gslider .carousel-caption .btn {
+        padding: 6px 14px;
+        font-size: 13px;
+    }
+
+    /* Move indicators higher for mobile */
+     #Gslider .carousel-indicators {
+        bottom: 10px;
+    } 
+
+ 
+
+}
     </style>
 @endpush
 
