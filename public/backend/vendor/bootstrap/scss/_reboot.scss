@@ -23,7 +23,7 @@
 }
 
 html {
-  font-family: sans-serif; // 2
+  font-family: sans-Poppins; // 2
   line-height: 1.15; // 3
   -webkit-text-size-adjust: 100%; // 4
   -webkit-tap-highlight-color: rgba($black, 0); // 5
@@ -45,7 +45,7 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 
 body {
   margin: 0; // 1
-  font-family: $font-family-base;
+  font-family: Poppins;
   @include font-size($font-size-base);
   font-weight: $font-weight-base;
   line-height: $line-height-base;
@@ -218,7 +218,7 @@ pre,
 code,
 kbd,
 samp {
-  font-family: $font-family-monospace;
+  font-family: Poppins;
   @include font-size(1em); // Correct the odd `em` font sizing in all browsers.
 }
 
@@ -318,7 +318,7 @@ select,
 optgroup,
 textarea {
   margin: 0; // Remove the margin in Firefox and Safari
-  font-family: inherit;
+  font-family: Poppins;
   @include font-size(inherit);
   line-height: inherit;
 }

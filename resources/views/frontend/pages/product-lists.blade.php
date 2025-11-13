@@ -579,7 +579,7 @@
         .filter_button {
             /* height:20px; */
             text-align: center;
-            background: #F7941D;
+            background: #0077B3;
             padding: 8px 16px;
             margin-top: 10px;
             color: white;

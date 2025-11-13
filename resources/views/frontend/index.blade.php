@@ -29,7 +29,7 @@
         /* Medium Banner Images */
         .midium-banner .single-banner img {
             width: 100%;
-            height: 750px;
+            height: 450px;
             object-fit: cover;
         }
 
@@ -903,7 +903,7 @@
             font-size: 50px;
             font-weight: bold;
             line-height: 100%;
-            color: #F7941D;
+            color: #000000ff;
         }
 
         #Gslider .carousel-inner .carousel-caption p {
