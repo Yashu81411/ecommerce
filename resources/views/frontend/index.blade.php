@@ -215,7 +215,7 @@
 
     <!-- Slider Area -->
     @if (count($banners) > 0)
-        <section id="Gslider" class="carousel slide" data-ride="carousel">
+       <section id="Gslider" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
                 @foreach ($banners as $key => $banner)
                     <li data-target="#Gslider" data-slide-to="{{ $key }}" class="{{ $key == 0 ? 'active' : '' }}">
@@ -227,7 +227,7 @@
                 @foreach ($banners as $key => $banner)
                     <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
                         <img class="first-slide" src="{{ $banner->photo }}" alt="First slide">
-                        <div class="carousel-caption d-none d-md-block text-left">
+                        <div class="carousel-caption d-md-block text-left">
                             <h1 class="wow fadeInDown">{{ $banner->title }}</h1>
                             <p>{!! html_entity_decode($banner->description) !!}</p>
                             <a class="btn btn-lg ws-btn wow fadeInUpBig" href="{{ route('product-grids') }}"
@@ -261,7 +261,7 @@
                     @if ($category_lists)
                         @foreach ($category_lists as $cat)
                             @if ($cat->is_parent == 1)
-                                <!-- Single Banner  -->
+                                
                                 <div class="col-lg-4 col-md-6 col-12">
                                     <div class="single-banner">
                                         @if ($cat->photo)
@@ -276,14 +276,14 @@
                                     </div>
                                 </div>
                             @endif
-                            <!-- /End Single Banner  -->
+                            
                         @endforeach
 
 
 
                         @foreach ($category_lists as $cat)
                             @if ($cat->is_parent == 1)
-                                <!-- Single Banner  -->
+                              
                                 <div class="col-lg-4 col-md-6 col-12">
                                     <div class="single-banner">
                                         @if ($cat->photo)
@@ -298,7 +298,7 @@
                                     </div>
                                 </div>
                             @endif
-                            <!-- /End Single Banner  -->
+                           
                         @endforeach
 
                     @endif
@@ -443,12 +443,12 @@
     $featured=DB::table('products')->where('is_featured',1)->where('status','active')->orderBy('id','DESC')->limit(1)->get();
 @endphp --}}
     <!-- Start Midium Banner  -->
-    <section class="midium-banner">
+    <!-- <section class="midium-banner">
         <div class="container">
             <div class="row">
                 @if ($featured)
                     @foreach ($featured as $data)
-                        <!-- Single Banner  -->
+                        
                         <div class="col-lg-6 col-md-6 col-12">
                             <div class="single-banner">
                                 @php
@@ -467,12 +467,12 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- /End Single Banner  -->
+                       
                     @endforeach
                 @endif
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- End Midium Banner -->
 
     <!-- Start Most Popular -->
@@ -541,7 +541,46 @@
     </div>
     <!-- End Most Popular Area -->
 
+<div class="custom-marquee">
+    <div class="marquee-content">
+        🛒 Buy From Your Favourite Merchant • 💯 Best Quality Guaranteed • 🚚 Fast Delivery • 🔥 Hot Deals Everyday • 🎉 Shop Now & Save More!
+    </div>
+</div>
+<style>
+       .custom-marquee {
+    background: #000;
+    color: #fff;
+    padding: 10px 0;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+}
 
+.marquee-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll-left 12s linear infinite;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* MOBILE text size */
+@media (max-width: 576px) {
+    .marquee-content {
+        font-size: 14px;
+    }
+}
+</style>
     <!-- Start Latest Items Carousel -->
 <div class="product-area most-popular section">
     <div class="container">
@@ -880,7 +919,7 @@
     <script type='text/javascript'
         src='https://platform-api.sharethis.com/js/sharethis.js#property=5f2e5abf393162001291e431&product=inline-share-buttons'
         async='async'></script> --}}
-    <style>
+   <style>
         /* Banner Sliding */
         #Gslider .carousel-inner {
             background: #000000;
@@ -916,6 +955,43 @@
         #Gslider .carousel-indicators {
             bottom: 70px;
         }
+
+        @media (max-width: 576px) {
+    #Gslider .carousel-inner {
+        height: 100%; /* Mobile-optimized height */
+    }
+
+    #Gslider .carousel-caption {
+        bottom: 15% !important; /* Move caption into view properly */
+        padding: 0 15px;
+        text-align: left;
+    } 
+
+    #Gslider .carousel-caption h1 {
+        font-size: 12px !important;
+        line-height: 1.3;
+    }
+
+    #Gslider .carousel-caption p {
+        font-size: 13px;
+        line-height: 1.4;
+        margin: 10px 0;
+    }
+
+    /* Button Resize */
+    #Gslider .carousel-caption .btn {
+        padding: 6px 14px;
+        font-size: 13px;
+    }
+
+    /* Move indicators higher for mobile */
+     #Gslider .carousel-indicators {
+        bottom: 10px;
+    } 
+
+ 
+
+}
     </style>
 @endpush
 
