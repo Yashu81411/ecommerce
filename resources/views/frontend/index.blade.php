@@ -55,28 +55,39 @@
         }
     </style>
     <style>
-        .single-product .product-img img,
-        .single-product .hover-img {
-            width: 100%;
-            height: 330px;
-            object-fit: cover;
-        }
+        /* DESKTOP DEFAULT */
+.single-product .product-img img,
+.single-product .hover-img {
+    width: 100%;
+    height: 350px !important;   /* slightly taller */
+    object-fit: cover;
+    border-radius: 10px;        /* improved border */
+}
 
-        @media (max-width: 768px) {
+/* TABLET */
+@media (max-width: 768px) {
+    .single-product .product-img img,
+    .single-product .hover-img {
+        height: 260px !important;   /* increased from 200 → 260 */
+    }
+}
 
-            .single-product .product-img img,
-            .single-product .hover-img {
-                height: 200px;
-            }
-        }
+/* SMALL MOBILE */
+@media (max-width: 576px) {
+    .single-product .product-img img,
+    .single-product .hover-img {
+        height: 180px !important;   /* increased from 180 → 240 */
+    }
+}
 
-        @media (max-width: 576px) {
+/* Reduce card height on mobile */
+@media (max-width: 576px) { 
+    .isotope-item {
+        min-height: 40px !important;
+    }
+}
 
-            .single-product .product-img img,
-            .single-product .hover-img {
-                height: 180px;
-            }
-        }
+
     </style>
     <style>
         label input[type="radio"]:checked+.size-btn {
@@ -337,7 +348,7 @@
                             <!-- Start Single Tab -->
                             @if ($product_lists)
                                 @foreach ($product_lists as $key => $product)
-                                    <div class="col-sm-6 col-md-6 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}" style="min-height: 650px;">
+                                    <div class="col-6 col-sm-6 col-md-6 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}" style="min-height: 500px;">
                                         <div class="single-product" style=" padding: 1.25rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
                                             <div class="product-img">
                                                 <a href="{{ route('product-detail', $product->slug) }}">
@@ -347,10 +358,10 @@
                                                         // dd($photo);
                                                     @endphp
                                                     <img class="default-img" src="{{ $photo[0] }}"
-                                                        alt="{{ $photo[0] }}" style="  border-radius: 2.5rem;" >
+                                                        alt="{{ $photo[0] }}" style="  border-radius: 7px;" >
                                                     
                                                     <img class="hover-img" src="{{ $photo[0] }}"
-                                                        alt="{{ $photo[0] }}" style="  border-radius: 2.5rem;">
+                                                        alt="{{ $photo[0] }}" style="  border-radius: 7px;">
                                                     @if ($product->stock <= 0)
                                                         <span class="out-of-stock">Sale out</span>
                                                     @elseif($product->condition == 'new')
