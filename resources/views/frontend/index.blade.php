@@ -55,28 +55,39 @@
         }
     </style>
     <style>
-        .single-product .product-img img,
-        .single-product .hover-img {
-            width: 100%;
-            height: 330px;
-            object-fit: cover;
-        }
+        /* DESKTOP DEFAULT */
+.single-product .product-img img,
+.single-product .hover-img {
+    width: 100%;
+    height: 350px !important;   /* slightly taller */
+    object-fit: cover;
+    border-radius: 10px;        /* improved border */
+}
 
-        @media (max-width: 768px) {
+/* TABLET */
+@media (max-width: 768px) {
+    .single-product .product-img img,
+    .single-product .hover-img {
+        height: 260px !important;   /* increased from 200 → 260 */
+    }
+}
 
-            .single-product .product-img img,
-            .single-product .hover-img {
-                height: 200px;
-            }
-        }
+/* SMALL MOBILE */
+@media (max-width: 576px) {
+    .single-product .product-img img,
+    .single-product .hover-img {
+        height: 180px !important;   /* increased from 180 → 240 */
+    }
+}
 
-        @media (max-width: 576px) {
+/* Reduce card height on mobile */
+@media (max-width: 576px) { 
+    .isotope-item {
+        min-height: 40px !important;
+    }
+}
 
-            .single-product .product-img img,
-            .single-product .hover-img {
-                height: 180px;
-            }
-        }
+
     </style>
     <style>
         label input[type="radio"]:checked+.size-btn {
@@ -311,33 +322,52 @@
                     <div class="product-info">
                         <div class="nav-main">
                             <!-- Tab Nav -->
-                            <ul class="nav nav-tabs filter-tope-group" id="myTab" role="tablist">
-                                @php
-                                    $categories = DB::table('categories')
-                                        ->where('status', 'active')
-                                        ->where('is_parent', 1)
-                                        ->get();
-                                    // dd($categories);
-                                @endphp
-                                @if ($categories)
-                                    <button class="btn" style="background:black"data-filter="*">
-                                        All Products
-                                    </button>
-                                    @foreach ($categories as $key => $cat)
-                                        <button class="btn"
-                                            style="background:none;color:black;"data-filter=".{{ $cat->id }}">
-                                            {{ $cat->title }}
-                                        </button>
-                                    @endforeach
-                                @endif
-                            </ul>
+                          <ul class="nav nav-tabs filter-tope-group" id="myTab" role="tablist"
+    style="
+        display:flex;
+        flex-wrap:nowrap;
+        overflow-x:auto;
+        overflow-y:hidden;
+        white-space:nowrap;
+        gap:10px;
+        padding-bottom:6px;
+        scrollbar-width:none;
+    "
+>
+    @php
+        $categories = DB::table('categories')
+            ->where('status', 'active')
+            ->where('is_parent', 1)
+            ->get();
+    @endphp
+
+    @if ($categories)
+        <button class="btn"
+            style="background:black;color:white;flex:0 0 auto;"
+            data-filter="*">
+            All Products
+        </button>
+
+        @foreach ($categories as $key => $cat)
+            <button class="btn"
+                style="background:white;color:black;border:1px solid #ccc;flex:0 0 auto;"
+                data-filter=".{{ $cat->id }}">
+                {{ $cat->title }}
+            </button>
+        @endforeach
+    @endif
+</ul>
+
                             <!--/ End Tab Nav -->
+
+                            
+                         
                         </div>
                         <div class="tab-content isotope-grid" id="myTabContent">
                             <!-- Start Single Tab -->
                             @if ($product_lists)
                                 @foreach ($product_lists as $key => $product)
-                                    <div class="col-sm-6 col-md-6 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}" style="min-height: 650px;">
+                                    <div class="col-6 col-sm-6 col-md-6 col-lg-3 p-b-35 isotope-item {{ $product->cat_id }}" style="min-height: 500px;">
                                         <div class="single-product" style=" padding: 1.25rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
                                             <div class="product-img">
                                                 <a href="{{ route('product-detail', $product->slug) }}">
@@ -347,10 +377,10 @@
                                                         // dd($photo);
                                                     @endphp
                                                     <img class="default-img" src="{{ $photo[0] }}"
-                                                        alt="{{ $photo[0] }}" style="  border-radius: 2.5rem;" >
+                                                        alt="{{ $photo[0] }}" style="  border-radius: 7px;" >
                                                     
                                                     <img class="hover-img" src="{{ $photo[0] }}"
-                                                        alt="{{ $photo[0] }}" style="  border-radius: 2.5rem;">
+                                                        alt="{{ $photo[0] }}" style="  border-radius: 7px;">
                                                     @if ($product->stock <= 0)
                                                         <span class="out-of-stock">Sale out</span>
                                                     @elseif($product->condition == 'new')
@@ -511,96 +541,67 @@
     </div>
     <!-- End Most Popular Area -->
 
-    <!-- Start Shop Home List  -->
-    <section class="shop-home-list section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-12">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="shop-section-title">
-                                <h1>Latest Items</h1>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        @php
-                            $product_lists = DB::table('products')
-                                ->where('status', 'active')
-                                ->orderBy('id', 'DESC')
-                                ->limit(6)
-                                ->get();
-                        @endphp
-                        @foreach ($product_lists as $product)
-                            <div class="col-md-4">
-                                <!-- Start Single List  -->
-                                <div class="single-list">
-                                    <div class="row">
-                                        <div class="col-lg-6 col-md-6 col-12">
-                                            <div class="list-image overlay">
-                                                @php
-                                                    $photo = explode(',', $product->photo);
-                                                    // dd($photo);
-                                                @endphp
-                                                <img src="{{ $photo[0] }}" alt="{{ $photo[0] }}">
-                                                {{-- <a href="{{route('add-to-cart',$product->slug)}}" class="buy"><i class="fa fa-shopping-bag"></i></a> --}}
-                                                <div class="buy-size-overlay">
-                                                    @if ($product->size)
-                                                        @php
-                                                            $sizes = explode(',', $product->size);
-                                                            $productSizes = DB::table('product_sizes')
-                                                                ->where('product_id', $product->id)
-                                                                ->pluck('stock', 'size');
-                                                        @endphp
-                                                        @foreach ($sizes as $size)
-                                                            @php
-                                                                $sizeTrimmed = trim($size);
-                                                                $sizeStock = $productSizes[$sizeTrimmed] ?? 0;
-                                                                //  if ($sizeTrimmed === 'Free Size') {
-                                                                //     $sizeStock = $product->stock ?? 0;
-                                                                // } else {
-                                                                //     $sizeStock = $productSizes[$sizeTrimmed] ?? 0;
-                                                                // }
-                                                            @endphp
 
-                                                            @if ($sizeStock > 0)
-                                                                <form action="{{ route('single-add-to-cart') }}"
-                                                                    method="POST" style="display:inline;">
-                                                                    @csrf
-                                                                    <input type="hidden" name="slug"
-                                                                        value="{{ $product->slug }}">
-                                                                    <input type="hidden" name="size"
-                                                                        value="{{ trim($size) }}">
-                                                                    <input type="hidden" name="quant[1]" value="1">
-                                                                    <button type="submit"
-                                                                        class="size-btn">{{ strtoupper(trim($size)) }}</button>
-                                                                </form>
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-md-6 col-12 no-padding">
-                                            <div class="content">
-                                                <h4 class="title"><a href="#">{{ $product->title }}</a></h4>
-                                                <p class="price with-discount">₹{{ number_format($product->discount, 2) }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- End Single List  -->
-                            </div>
-                        @endforeach
-
-                    </div>
+    <!-- Start Latest Items Carousel -->
+<div class="product-area most-popular section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-title">
+                    <h2>Latest Items</h2>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- End Shop Home List  -->
+        <div class="row">
+            <div class="col-12">
+                <div class="owl-carousel popular-slider">
+                    @foreach ($product_lists as $product)
+                        <!-- Start Single Product -->
+                        <div class="single-product">
+                            <div class="product-img">
+                                <a href="{{ route('product-detail', $product->slug) }}">
+                                    @php
+                                        $photo = explode(',', $product->photo);
+                                    @endphp
+                                    <img class="default-img" src="{{ $photo[0] }}" alt="{{ $photo[0] }}">
+                                    <img class="hover-img" src="{{ $photo[0] }}" alt="{{ $photo[0] }}">
+                                </a>
+                                <div class="button-head">
+                                    <div class="product-action">
+                                        <a data-toggle="modal" data-target="#{{ $product->id }}"
+                                            title="Quick View" href="#"><i class=" ti-eye"></i><span>Quick Shop</span></a>
+                                        <a title="Wishlist"
+                                            href="{{ route('add-to-wishlist', $product->slug) }}"><i
+                                                class=" ti-heart "></i><span>Add to Wishlist</span></a>
+                                    </div>
+                                    <div class="product-action-2">
+                                        <a href="{{ route('add-to-cart', $product->slug) }}">Add to cart</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product-content">
+                                <h3><a href="{{ route('product-detail', $product->slug) }}">{{ $product->title }}</a></h3>
+                                <div class="product-price">
+                                    <span class="old">₹{{ number_format($product->price, 2) }}</span>
+                                    @php
+                                        $after_discount = $product->price - ($product->price * $product->discount) / 100;
+                                    @endphp
+                                    <span>₹{{ number_format($after_discount, 2) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Single Product -->
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Latest Items Carousel -->
+
+
+ 
+   
 
     <!-- Start Shop Blog  -->
     <section class="shop-blog section">

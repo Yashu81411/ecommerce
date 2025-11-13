@@ -2,6 +2,26 @@
 @yield('meta')
 <!-- Title Tag  -->
 <title>@yield('title')</title>
+
+ <!-- Character encoding -->
+<meta charset="UTF-8">
+
+<!-- IE compatibility (legacy support only) -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<!-- Viewport for responsive design -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- SEO & metadata -->
+<!-- <meta name="description" content="Your website short description here.">
+<meta name="author" content="Your Name or Company"> -->
+
+<!-- Optional: mobile browser color theme -->
+<meta name="theme-color" content="#0781B1">
+
+<!-- Optional: copyright info -->
+<meta name="copyright" content="© 2025 Your Company Name">
+
 <!-- Favicon -->
 <link rel="icon" type="image/png" href="images/favicon.png">
 <!-- Web Font -->
