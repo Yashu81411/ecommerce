@@ -15,6 +15,7 @@ protected $fillable = [
     'alt_number',
     'email',
     'address',
+    'photo'
 ];
 
     // public static function getProductByBrand($id){

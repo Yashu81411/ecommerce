@@ -145,7 +145,7 @@ window.onload = () => {
 					items:1,
 				},
 				300: {
-					items:1,
+					items:2,
 				},
 				480: {
 					items:2,
@@ -155,6 +155,41 @@ window.onload = () => {
 				},
 				1170: {
 					items:4,
+				},
+			}
+		});
+
+
+		$('.small-banner-owl').owlCarousel({
+			items:1,
+			autoplay:true,
+			autoplayTimeout:5000,
+			smartSpeed: 400,
+			animateIn: 'fadeIn',
+			animateOut: 'fadeOut',
+			autoplayHoverPause:true,
+			loop:true,
+			nav:true,
+			    margin: 10,
+
+			merge:true,
+			dots:false,
+			navText: ['<i class="ti-angle-left"></i>', '<i class="ti-angle-right"></i>'],
+			responsive:{
+				0: {
+					items:1,
+				},
+				300: {
+					items:1.2,
+				},
+				480: {
+					items:1,
+				},
+				768: {
+					items:3,
+				},
+				1170: {
+					items:3,
 				},
 			}
 		});

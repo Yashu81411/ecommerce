@@ -20,6 +20,7 @@
 <tr>
     <th>ID</th>
     <th>Title</th>
+    <th>Photo</th>
     <th>Brand Name</th>
     <th>Phone</th>
     <th>Alt Phone</th>
@@ -35,6 +36,7 @@
 <tr>
     <th>ID</th>
     <th>Title</th>
+    <th>Photo</th>
     <th>Brand Name</th>
     <th>Phone</th>
     <th>Alt Phone</th>
@@ -51,6 +53,13 @@
                <tr>
     <td>{{$brand->id}}</td>
     <td>{{$brand->title}}</td>
+     <td>
+                        @if($brand->photo)
+                            <img src="{{$brand->photo}}" class="img-fluid" style="max-width:80px" alt="{{$brand->photo}}">
+                        @else
+                            <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="avatar.png">
+                        @endif
+                    </td>
     <td>{{$brand->name ?? '-'}}</td>
     <td>{{$brand->contact_number ?? '-'}}</td>
     <td>{{$brand->alt_number ?? '-'}}</td>

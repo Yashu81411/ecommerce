@@ -42,6 +42,8 @@ class BrandController extends Controller
         'title' => 'required|string',
         'status' => 'required|in:active,inactive',
         'name' => 'nullable|string|max:255',
+                    'photo' => 'nullable|string',
+
         'contact_number' => 'nullable|string|max:20',
         'alt_number' => 'nullable|string|max:20',
         'email' => 'nullable|email|unique:brands,email',
@@ -108,6 +110,8 @@ class BrandController extends Controller
         'title' => 'required|string',
         'status' => 'required|in:active,inactive',
         'name' => 'nullable|string|max:255',
+                    'photo' => 'nullable|string',
+
         'contact_number' => 'nullable|string|max:20',
         'alt_number' => 'nullable|string|max:20',
         'email' => 'nullable|email|unique:brands,email,'.$brand->id,
