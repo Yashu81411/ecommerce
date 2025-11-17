@@ -177,7 +177,7 @@ window.onload = () => {
 			navText: ['<i class="ti-angle-left"></i>', '<i class="ti-angle-right"></i>'],
 			responsive:{
 				0: {
-					items:1,
+					items:1.2,
 				},
 				300: {
 					items:1.2,
@@ -336,7 +336,7 @@ window.onload = () => {
 	/*====================================
 	18. Nice Select JS
 	======================================*/	
-	$('select').niceSelect();
+	// $('select').niceSelect();
 		
 	/*=====================================
 	 Others JS
